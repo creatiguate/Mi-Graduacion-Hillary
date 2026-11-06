@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es-GT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071e48">
+  <meta name="description" content="Una noche para celebrar sueños cumplidos. Te invito a mi graduación, el 28 de noviembre de 2026.">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.supabase.co; media-src 'self' blob:; connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hillary · Mi graduación 2026">
+  <meta property="og:description" content="Los sueños se alcanzan con esfuerzo, pero se disfrutan más cuando se comparten. 28 de noviembre, 6:00 p. m.">
+  <meta property="og:image" content="./assets/images/social-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Hillary | Mi graduación · 28.11.2026</title>
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600;700&family=Great+Vibes&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./config.js"></script>
+  <script defer src="./opening.js"></script>
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <noscript><style>.opening{display:none!important}.reveal{opacity:1!important;transform:none!important}</style></noscript>
+  <a class="skip" href="#invitacion">Ir al contenido</a>
+  <div class="reading-progress" id="readingProgress" aria-hidden="true"></div>
+  <div class="flying-butterflies" id="flyingButterflies" aria-hidden="true"></div>
+
+  <!-- Animación vertical a pantalla completa, recortada por el centro en móviles -->
+  <div class="opening" id="opening" role="dialog" aria-modal="true" aria-label="Animación de bienvenida a la graduación">
+    <video id="introVideo" class="intro-video" preload="metadata" playsinline webkit-playsinline muted poster="./assets/images/intro-poster.jpg" aria-label="Animación de birrete de graduación">
+      <source src="./assets/video/apertura.mp4" type="video/mp4">
+    </video>
+    <div class="opening-cta" id="openingCta">
+      
+      <button class="opening-action" id="introStart" type="button">Abrir mi invitación <span aria-hidden="true">♡</span></button>
+      <span class="opening-helper">Toca para vivir esta sorpresa con música</span>
+    </div>
+    <button id="introSkip" class="intro-skip" type="button">Omitir animación</button>
+    <p class="intro-wait" id="introWait" hidden>Preparando tu invitación…</p>
+    <div class="intro-loading" id="introLoading" hidden aria-live="polite">
+      <div class="intro-loading-track" aria-hidden="true">
+        <div class="intro-loading-fill" id="introLine"></div>
+        <img class="intro-loading-butterfly" id="introButterfly" src="./assets/images/mariposa 2.gif" alt="">
+      </div>
+      <span class="intro-loading-text">Abriendo tu invitación <strong id="introPercent">0%</strong></span>
+    </div>
+  </div>
+
+  <header class="site-header" id="header">
+    <a href="#inicio" class="wordmark" aria-label="Hillary, ir al inicio">H<span class="wordmark-star">✦</span><span class="wordmark-year">26</span></a>
+    <span class="header-edition">Una celebración especial</span>
+    <a href="#confirmacion" class="header-rsvp" id="headerRsvp">Confirmar asistencia <span aria-hidden="true">♡</span></a>
+  </header>
+
+  <main id="invitacion">
+    <section class="hero" id="inicio" aria-labelledby="heroTitle">
+      <div class="butterfly flutter-hero-one" aria-hidden="true"><img src="./assets/images/mariposa 1.gif" alt=""></div>
+      <div class="butterfly flutter-hero-two" aria-hidden="true"><img src="./assets/images/mariposa 2.gif" alt=""></div>
+      <div class="hero-content">
+        <span class="hero-kicker"><i></i> GRADUACIÓN · PROMOCIÓN 2026 <i></i></span>
+        <span class="hero-small">Después de cada esfuerzo...</span>
+        <h2 id="heroTitle">Este sueño<br><em>se celebra.</em></h2>
+        <p class="hero-name">Hillary<span aria-hidden="true">♡</span></p>
+        <div class="hero-rule"></div>
+        <p class="hero-occasion">MI GRADUACIÓN · UN SUEÑO CUMPLIDO</p>
+        <p class="hero-date">28 NOVIEMBRE 2026 <span>·</span> 6:00 P. M.</p>
+        <a class="text-link hero-explore" href="#mensaje">Desliza para descubrir <span aria-hidden="true">↓</span></a>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-image-wrap"><img src="./assets/images/hero.webp" width="1199" height="1312" fetchpriority="high" alt="Hillary sonriendo con sus ojos detrás de un birrete azul rey de graduación"></div>
+        <span class="hero-side-note">MI HISTORIA CONTINÚA · 2026</span>
+        <div class="hero-badge" aria-hidden="true"><span>28</span><small>NOV<br>2026</small></div>
+      </div>
+      <div class="hero-bottom" aria-hidden="true">UN NUEVO CAPÍTULO <span>✦</span> HILLARY · 2026</div>
+    </section>
+
+    <section class="letter-section section-padding" id="mensaje" aria-labelledby="letterTitle">
+      <div class="butterfly flutter-letter" aria-hidden="true"><img src="./assets/images/mariposa 2.gif" alt=""></div>
+      <div class="section-frame reveal">
+        <p class="eyebrow center">Una historia hecha de esfuerzo</p>
+        <div class="ornament" aria-hidden="true"><span></span>✦<span></span></div>
+        <h2 class="letter-title" id="letterTitle">FAMILIA <i>Y</i> AMIGOS</h2>
+        <p class="letter-lead">Tras noches largas y días de esfuerzo, llantos y risas, llegó el momento de celebrar la cosecha de este camino.</p>
+        <p class="letter-body">Te invito a festejar conmigo por los sueños cumplidos y los que aún me esperan.</p>
+        <p class="letter-body">Gracias por haberme acompañado todos estos años.</p>
+        <p class="letter-sign">Con cariño, <span>Hillary</span></p>
+        <span class="corner-flower corner-flower-left" aria-hidden="true">✽</span>
+        <span class="corner-flower corner-flower-right" aria-hidden="true">✽</span>
+      </div>
+    </section>
+
+    <section class="story-section" aria-labelledby="storyTitle">
+      <div class="story-visual reveal">
+        <div class="story-photo"><img src="./assets/images/portrait.webp" width="1138" height="1382" loading="lazy" alt="Retrato de Hillary con toga negra, estola azul y birrete de graduación"></div>
+        <span class="story-photo-caption">¡Lo logré!</span>
+      </div>
+      <div class="story-content reveal">
+        <p class="eyebrow">El cierre de una etapa</p>
+        <h2 id="storyTitle">Todo esfuerzo<br>tiene su <em>momento.</em></h2>
+        <span class="story-flourish" aria-hidden="true">✦</span>
+        <p>Hoy cierro un capítulo lleno de aprendizajes y abro otro con nuevos sueños, nuevos caminos y muchas razones para celebrar.</p>
+        <div class="story-class">PROMOCIÓN <strong>2026</strong></div>
+      </div>
+    </section>
+
+    <section class="event-section section-padding" id="detalles" aria-labelledby="eventTitle">
+      <div class="event-inner reveal">
+        <p class="eyebrow center">Guarda esta fecha</p>
+        <h2 id="eventTitle">El gran <em>día</em></h2>
+        <div class="event-date">
+          <span class="event-weekday">SÁBADO</span>
+          <div class="event-number"><span>28</span></div>
+          <div class="event-month">NOVIEMBRE <span>2026</span></div>
+        </div>
+        <div class="event-separator"><i></i><span>✦</span><i></i></div>
+        <p class="event-time">6:00 <span>P. M.</span></p>
+        <p class="event-caption">Una noche para recordar siempre</p>
+        <div class="countdown-label">FALTAN PARA CELEBRAR</div>
+        <div class="countdown" id="countdown" aria-label="Cuenta regresiva para la graduación">
+          <div><b id="cdDays">00</b><small>DÍAS</small></div><span>:</span>
+          <div><b id="cdHours">00</b><small>HORAS</small></div><span>:</span>
+          <div><b id="cdMinutes">00</b><small>MIN</small></div><span>:</span>
+          <div><b id="cdSeconds">00</b><small>SEG</small></div>
+        </div>
+        <button class="btn btn-outline-gold" id="calendarButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 10h18"/></svg> Agregar a mi calendario</button>
+      </div>
+      <div class="butterfly flutter-event" aria-hidden="true"><img src="./assets/images/mariposa 1.gif" alt=""></div>
+      <div class="event-deco event-deco-one" aria-hidden="true">✧</div><div class="event-deco event-deco-two" aria-hidden="true">✧</div>
+    </section>
+
+    <section class="venue-section section-padding" id="ubicacion" aria-labelledby="venueTitle">
+      <div class="venue-grid">
+        <div class="venue-left reveal">
+          <p class="eyebrow">El lugar donde celebraremos</p>
+          <h2 id="venueTitle">Nos vemos<br><em>allí.</em></h2>
+          <div class="venue-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.1"><path d="M32 58S11 37 11 23a21 21 0 0 1 42 0C53 37 32 58 32 58Z"/><circle cx="32" cy="23" r="8"/><path d="M23 47h18"/></svg></div>
+          <h3>Hotel El Campo</h3>
+          <p>Flores Costa Cuca, Quetzaltenango</p>
+          <p class="venue-note">La misma ubicación de nuestra celebración anterior.</p>
+          <a class="btn btn-blue" href="https://www.google.com/maps/search/?api=1&amp;query=Hotel%20El%20Campo%20Flores%20Costa%20Cuca" target="_blank" rel="noopener noreferrer" aria-label="Buscar Hotel El Campo en Google Maps">Cómo llegar <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="venue-right reveal">
+          <div class="venue-detail-label">NOTA PARA MIS INVITADOS</div>
+          <div class="venue-notice"><span class="notice-symbol" aria-hidden="true">✧</span><p>En esta ocasión, <strong>la piscina no estará habilitada</strong> durante nuestra celebración. Gracias por tu comprensión.</p></div>
+          <div class="venue-decoration" aria-hidden="true"><div class="venue-deco-circle"><span>H</span><small>28 · 11 · 26</small></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="place-gallery section-padding" aria-labelledby="placeGalleryTitle">
+      <div class="butterfly flutter-place-one" aria-hidden="true"><img src="./assets/images/mariposa 1.gif" alt=""></div>
+      <div class="butterfly flutter-place-two" aria-hidden="true"><img src="./assets/images/mariposa 2.gif" alt=""></div>
+      <div class="place-gallery-intro reveal">
+        <p class="eyebrow center">Un lugar lleno de encanto</p>
+        <h2 id="placeGalleryTitle">Aquí celebraremos <em>juntos.</em></h2>
+        <p>Un pequeño vistazo al Hotel El Campo, donde nos encontraremos para compartir esta fecha inolvidable.</p>
+      </div>
+      <div class="place-photos reveal">
+        <figure class="place-photo place-photo-main"><img src="./assets/images/lugar-3.webp" alt="Piscina del Hotel El Campo iluminada de azul y violeta durante la noche" loading="lazy"><figcaption>Una noche para recordar</figcaption></figure>
+        <figure class="place-photo"><img src="./assets/images/lugar-1.webp" alt="Piscina del hotel y vegetación que rodea sus instalaciones" loading="lazy"><figcaption>Detalles del lugar</figcaption></figure>
+        <figure class="place-photo"><img src="./assets/images/lugar-2.webp" alt="Flores tropicales en el área exterior del hotel" loading="lazy"><figcaption>Un rincón especial</figcaption></figure>
+      </div>
+      <p class="place-alert"><span aria-hidden="true">✧</span> Las fotografías muestran las instalaciones. La piscina no estará habilitada el día de la celebración.</p>
+    </section>
+
+    <section class="newspaper-section section-padding" aria-labelledby="newsTitle">
+      <div class="newspaper-inner">
+        <div class="news-head reveal"><p class="eyebrow">Una noticia que me llena de alegría</p><h2 id="newsTitle">La noticia más <em>bonita.</em></h2><p>Un recuerdo de esta etapa que guardaré para siempre.</p></div>
+        <figure class="newspaper-polaroid reveal"><img src="./assets/images/newspaper.webp" width="1312" height="985" loading="lazy" alt="Hillary mostrando completamente su periódico personalizado de graduación 2026, con flores y la frase Hillary se gradúa"><figcaption class="polaroid-handwriting">¡Un sueño cumplido! ♡</figcaption><a class="news-zoom" href="./assets/images/newspaper.webp" target="_blank" rel="noopener noreferrer">Ver el periódico en grande <span aria-hidden="true">↗</span></a></figure>
+      </div>
+    </section>
+
+    <section class="gifts-section section-padding" aria-labelledby="giftsTitle">
+      <div class="gifts-inner reveal">
+        <span class="gifts-sparkle" aria-hidden="true">✦</span>
+        <p class="eyebrow center">Un pequeño detalle</p>
+        <h2 id="giftsTitle">Mi mejor regalo<br>es <em>tu presencia.</em></h2>
+        <p>Si deseas obsequiarme algo, agradeceré mucho un detalle en efectivo. Puedes escribir tu nombre en el sobre para saber de quién viene ese bonito gesto.</p>
+        <div class="gifts-heart" aria-hidden="true">♡</div>
+      </div>
+    </section>
+
+    <section class="rsvp-section section-padding" id="confirmacion" aria-labelledby="rsvpTitle">
+      <div class="rsvp-butterfly butterfly flutter-rsvp" aria-hidden="true"><img src="./assets/images/mariposa 2.gif" alt=""></div>
+      <div class="rsvp-paper reveal">
+        <div class="ornament" aria-hidden="true"><span></span>✦<span></span></div>
+        <p class="eyebrow center">Tu compañía hará esta noche aún más especial</p>
+        <h2 id="rsvpTitle">¿Me acompañas<br><em>en este día?</em></h2>
+        <p class="rsvp-intro">Por favor, confirma tu asistencia. Tu respuesta llegará directamente por WhatsApp.</p>
+        <div class="rsvp-event-summary" aria-label="Resumen de la celebración">
+          <div><span class="rsvp-summary-icon" aria-hidden="true">28</span><small>noviembre</small></div>
+          <div><span class="rsvp-summary-icon" aria-hidden="true">6:00</span><small>p. m.</small></div>
+          <div><span class="rsvp-summary-icon rsvp-summary-pin" aria-hidden="true">⌖</span><small>Flores Costa Cuca</small></div>
+        </div>
+        <form id="rsvpForm" novalidate>
+          <label for="rsvpName">Tu nombre completo</label>
+          <input id="rsvpName" name="rsvpName" type="text" required autocomplete="name" maxlength="70" minlength="2" placeholder="Escribe tu nombre completo">
+          <fieldset class="rsvp-options">
+            <legend>¿Podrás acompañarme?</legend>
+            <label><input type="radio" name="attendance" value="si" required checked><span>Sí, ¡con mucho gusto!</span></label>
+            <label><input type="radio" name="attendance" value="no" required><span>Esta vez no podré</span></label>
+          </fieldset>
+          <div class="rsvp-people" id="rsvpPeopleBox"><label for="rsvpPeople">Personas que asistirán (incluyéndote)</label><select id="rsvpPeople" name="rsvpPeople"><option value="1">1 persona</option><option value="2">2 personas</option><option value="3">3 personas</option><option value="4">4 personas</option><option value="5">5 personas</option><option value="6">6 personas</option></select></div>
+          <label for="rsvpMessage">Un mensaje para Hillary <span class="optional">(opcional)</span></label>
+          <textarea id="rsvpMessage" name="rsvpMessage" rows="3" maxlength="220" placeholder="Escribe unas palabras bonitas..."></textarea>
+          <button class="btn btn-blue rsvp-submit" type="submit">Confirmar por WhatsApp <span aria-hidden="true">♡</span></button>
+        </form>
+        <p class="rsvp-fineprint">Se abrirá WhatsApp con tu respuesta lista para enviar al número de confirmaciones. Revisa y pulsa «Enviar» para completar tu confirmación. Este sitio no almacena tus respuestas.</p>
+        <div class="ornament rsvp-bottom-ornament" aria-hidden="true"><span></span>✦<span></span></div>
+      </div>
+    </section>
+
+    <section class="gallery-section section-padding" id="galeria" aria-labelledby="galleryTitle">
+      <div class="butterfly flutter-gallery-one" aria-hidden="true"><img src="./assets/images/mariposa 1.gif" alt=""></div>
+      <div class="butterfly flutter-gallery-two" aria-hidden="true"><img src="./assets/images/mariposa 2.gif" alt=""></div>
+      <div class="gallery-container">
+        <div class="gallery-header reveal">
+          <span class="eyebrow">Un álbum hecho entre todos</span>
+          <h2 id="galleryTitle">Capturemos <em>recuerdos.</em></h2>
+          <p>Las mejores memorias no solo se viven, también se guardan. Toma una fotografía o súbela desde tu celular para formar parte de nuestro álbum de graduación.</p>
+        </div>
+        <div class="gallery-layout">
+          <div class="upload-card reveal">
+            <div class="upload-deco" aria-hidden="true">✧</div>
+            <p class="upload-kicker">NUESTRO ÁLBUM</p>
+            <h3>¡Sonríe para<br>la foto!</h3>
+            <div class="camera-icon" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M9 19h12l5-6h14l5 6h10v31H9z"/><circle cx="32" cy="34" r="10"/><path d="M49 26h1"/></svg></div>
+            <div class="upload-actions"><button type="button" class="btn btn-blue" id="cameraButton">Abrir cámara <span aria-hidden="true">↗</span></button><button type="button" class="btn btn-cream" id="chooseButton">Elegir de mi galería</button></div>
+            <input id="filePicker" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" hidden aria-label="Seleccionar foto de la galería">
+            <input id="cameraPicker" type="file" accept="image/*" capture="environment" hidden aria-label="Tomar una foto desde el teléfono">
+            <div class="upload-preview" id="uploadPreview" hidden><img id="previewImage" alt="Vista previa de la imagen que vas a compartir"><button type="button" id="removePhoto" aria-label="Quitar imagen seleccionada">×</button></div>
+            <form id="uploadForm" novalidate>
+              <label for="guestName">¿Cómo te llamas?</label>
+              <input id="guestName" name="guestName" type="text" placeholder="Tu nombre" maxlength="36" minlength="2" autocomplete="name" required>
+              <label class="consent-row"><input id="photoConsent" type="checkbox" required><span>Confirmo que puedo compartir esta foto y acepto que esta foto y mi nombre aparezcan en la galería visible para quienes tengan el enlace, después de su revisión.</span></label>
+              <div id="turnstileMount" class="turnstile-mount" aria-label="Verificación de seguridad"></div>
+              <button type="submit" class="btn btn-blue submit-upload" id="submitPhoto">Añadir al álbum <span aria-hidden="true">♡</span></button>
+            </form>
+            <p class="upload-limit">Fotos JPG, PNG o WebP · Máximo 12 MB antes de optimizar.</p>
+            <p class="gallery-mode-note" id="galleryModeNote" role="status"></p>
+          </div>
+          <div class="gallery-wall reveal">
+            <div class="gallery-wall-heading"><h3>Nuestros momentos</h3><span id="galleryCount">0 FOTOS</span></div>
+            <div class="photo-wall" id="photoWall" aria-live="polite"></div>
+            <div class="gallery-empty" id="galleryEmpty">
+              <div class="empty-polaroid"><div class="empty-polaroid-image"><span>✦</span><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><rect x="7" y="12" width="34" height="26" rx="2"/><circle cx="18" cy="21" r="3"/><path d="m10 34 10-9 7 6 5-4 7 7"/></svg></div><span>Aquí empieza nuestra historia ♡</span></div>
+              <p>Las fotografías de esta noche aparecerán aquí. ¡Sé de los primeros en compartir una!</p>
+            </div>
+            <button type="button" id="refreshGallery" class="refresh-gallery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5 9a8 8 0 0 1 14-2l1 5M4 12l1 5a8 8 0 0 0 14-2"/></svg> Actualizar galería</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-section section-padding" aria-labelledby="finalTitle">
+      <div class="butterfly flutter-final" aria-hidden="true"><img src="./assets/images/mariposa 2.gif" alt=""></div>
+      <div class="final-inner reveal">
+        <span class="final-star" aria-hidden="true">✦</span>
+        <p class="eyebrow">Nos vemos el 28 de noviembre</p>
+        <h2 id="finalTitle">Los sueños se alcanzan con esfuerzo,<br><em>pero se disfrutan aún más cuando se comparten.</em></h2>
+        <p class="final-script">Con amor, Hillary</p><p class="song-note">Una canción para recordar este momento · «Un viaje largo» — Marcela Gándara</p>
+        <a href="#confirmacion" class="btn btn-outline-gold">Confirmar mi asistencia <span aria-hidden="true">♡</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-event">HILLARY <span aria-hidden="true">✦</span> PROMOCIÓN 2026</div>
+    <div class="footer-credit"><span>Diseñada por</span><img src="./assets/images/logo-creatiguate-footer.png" loading="lazy" width="240" height="90" alt="CreatiGuate · Agencia Creativa"></div>
+  </footer>
+
+  <button class="audio-toggle" type="button" id="audioToggle" hidden aria-label="Reproducir música" title="Música"><svg class="music-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="audio-state" id="audioState">Reproducir música</span></button>
+  <audio id="musicPlayer" loop preload="none"></audio>
+
+  <div class="camera-modal" id="cameraModal" hidden role="dialog" aria-modal="true" aria-labelledby="cameraTitle">
+    <div class="camera-panel"><div class="camera-top"><h2 id="cameraTitle">Una foto para el recuerdo</h2><button type="button" id="closeCamera" class="close-modal" aria-label="Cerrar cámara">×</button></div><div class="camera-feed"><video id="cameraVideo" autoplay muted playsinline aria-label="Vista previa de la cámara"></video></div><div class="camera-controls"><button type="button" id="switchCamera" class="switch-camera" aria-label="Cambiar cámara"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11V7l4-3m14 9v4l-4 3M3 7h11m7 10H10"/></svg></button><button type="button" id="snapPhoto" class="snap-photo" aria-label="Capturar foto"><span></span></button><span class="camera-blank"></span></div></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

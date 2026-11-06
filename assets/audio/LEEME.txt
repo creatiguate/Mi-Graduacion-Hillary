@@ -1,0 +1,13 @@
+AUDIO DE LA INVITACIÓN
+
+Se incluyó el archivo MP3 proporcionado para este encargo:
+  un-viaje-largo.mp3
+
+ATENCIÓN: el hecho de haber aportado la canción no demuestra que se
+tenga autorización para publicarla o redistribuirla. Una página
+pública de GitHub Pages permitirá a terceros acceder al archivo.
+Comprueba los derechos o licencia antes de desplegar la web.
+
+Si no tienes autorización: retira el archivo MP3 de esta carpeta
+y cambia musicUrl a cadena vacía ("") en config.js. La invitación
+seguirá funcionando, sin música.

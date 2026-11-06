@@ -1,0 +1,20 @@
+INVITACIÓN DIGITAL HILLARY · CREATIGUATE | VERSIÓN COMERCIAL
+==========================================================
+
+1. Descomprime el ZIP.
+2. Abre la carpeta del proyecto y sube TODO SU CONTENIDO al nivel raíz
+   del repositorio (index.html y assets/ deben quedar al mismo nivel).
+3. GitHub > Settings > Pages > Deploy from a branch > main > /(root).
+4. Abre el enlace HTTPS publicado desde el teléfono.
+5. Pulsa «Abrir mi invitación»: video 100% pantalla, mariposas, música.
+   Si hay un problema, «Omitir animación» desbloquea la página.
+6. El formulario de asistencia prepara un WhatsApp al +502 3340 2375.
+   La confirmación se completa cuando el invitado pulsa «Enviar».
+7. La galería estilo Polaroid será COMPARTIDA solo después de conectar
+   Supabase + Turnstile; sin ello es una prueba local por dispositivo.
+8. Al pie se muestra «Diseñada por» y el logo original de CreatiGuate.
+
+ANTES DE PUBLICAR: comprueba el pin del hotel y los derechos para usar
+la grabación musical. El MP3 aportado es de terceros y no implica licencia.
+
+VER README.md PARA CONFIGURACIÓN DE GALERÍA Y SEGURIDAD.
