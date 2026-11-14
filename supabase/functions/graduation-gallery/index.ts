@@ -2,7 +2,7 @@
  * Supabase Edge Function: subida pública con cuota + galería privada moderada.
  * Seguridad:
  *  - allowlist de Origin y método
- *  - 4 intentos/hora/IP hash (SQL, bloqueo atómico)
+ *  - 50 intentos/hora/IP hash (SQL, bloqueo atómico)
  *  - límites de peso, cabecera JPEG, dimensiones y eliminación de EXIF/metadatos
  *  - bucket PRIVADO; URLs firmadas solo a entradas approved
  *  - RLS bloquea acceso directo; service_role únicamente en Edge Function
@@ -120,7 +120,7 @@ async function uploadPhoto(request: Request, origin: string) {
   const hashed = await ipHash(ip);
   const { data: slot, error: quotaError } = await supabase.rpc('reserve_graduation_upload_slot', { p_ip_hash: hashed });
   if (quotaError) { console.error('Quota error', quotaError.code); return fail('No se pudo validar el límite de subidas', 500, origin); }
-  if (slot !== true) return fail('Límite de 4 fotos por hora alcanzado. Inténtalo más tarde', 429, origin);
+  if (slot !== true) return fail('Límite de 50 fotos por hora alcanzado. Inténtalo más tarde', 429, origin);
   let scrubbed: Uint8Array;
   try { scrubbed = scrubJpeg(new Uint8Array(await uploaded.arrayBuffer())); }
   catch { return fail('La fotografía no tiene un formato JPEG válido', 415, origin); }

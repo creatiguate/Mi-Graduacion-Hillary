@@ -46,7 +46,7 @@ GitHub Pages es hosting estático y **no** ofrece por sí mismo una base de dato
 1. Crea un proyecto nuevo en [Supabase](https://supabase.com/), inicia sesión y conserva su `project ref`.
 2. Abre **SQL Editor** del proyecto, pega el contenido completo de `supabase/migrations/20261106000000_graduation_gallery.sql` y ejecútalo **una sola vez**; alternativamente aplica la migración con Supabase CLI. Esto crea:
    - tabla `graduation_photos` con estados `pending`, `approved`, `rejected`;
-   - tabla y función para limitar a **4 intentos por hora** por IP hash;
+   - tabla y función para limitar a **50 intentos por hora** por IP hash;
    - bucket `graduation-photos` **privado**, con límite de 5 MB/JPEG;
    - restricciones de acceso RLS (ninguna lectura/escritura pública directa).
 3. Asegúrate de **NO** activar `Public bucket` y de no crear políticas públicas de acceso a las fotos o tablas.
@@ -117,7 +117,7 @@ Al abrir la invitación se intentará reproducir; si el navegador lo bloquea, el
 
 - **Captura:** la cámara se activa solo cuando el invitado pulsa **Abrir cámara**, solicita permiso del navegador y se apaga al cerrar el cuadro. Funciona en contextos seguros como HTTPS o localhost.
 - **Fotos:** el navegador convierte la imagen a JPEG y reduce su tamaño, lo que normalmente elimina metadatos del archivo original. La función también elimina segmentos JPEG de metadatos previos al primer escaneo (EXIF/XMP/COM) y valida encabezados/dimensiones. No permite subir SVG ni scripts.
-- **Abuso:** la API limita a 4 intentos por hora según IP hash, pero no usa captcha. CORS no es autenticación y no detiene bots que contacten directamente la API; para un evento de mayor volumen, añade una protección antiabuso y límites apropiados en el proveedor.
+- **Abuso:** la API limita a 50 intentos por hora según IP hash, pero no usa captcha. Invitados conectados a la misma red comparten este límite. CORS no es autenticación y no detiene bots que contacten directamente la API; modera las fotos antes de publicarlas.
 - **Acceso:** CORS con lista de orígenes, almacenamiento privado, URLs firmadas temporales, tabla sin políticas públicas, secretos exclusivamente en servidor y aprobación manual.
 - **Contenido:** no insertamos los nombres enviados mediante `innerHTML`; se pintan como texto seguro. Validación de longitud y caracteres tanto en navegador como servidor.
 - **Cabeceras:** la página incorpora una política CSP mediante etiqueta meta, no carga JavaScript de bibliotecas arbitrarias y usa `rel="noopener noreferrer"` en enlaces externos. GitHub Pages **no permite definir todas las cabeceras HTTP de seguridad** desde archivos estáticos; para CSP como cabecera HTTP, HSTS, frame-ancestors y otras reglas, usa un proxy/CDN configurable.
