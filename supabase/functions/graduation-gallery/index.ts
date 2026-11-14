@@ -1,17 +1,17 @@
 /**
- * Supabase Edge Function: subida pública con cuota + galería privada moderada.
+ * Supabase Edge Function: subida pública con cuota + álbum compartido.
  * Seguridad:
  *  - allowlist de Origin y método
  *  - 50 intentos/hora/IP hash (SQL, bloqueo atómico)
  *  - límites de peso, cabecera JPEG, dimensiones y eliminación de EXIF/metadatos
- *  - bucket PRIVADO; URLs firmadas solo a entradas approved
+ *  - bucket PRIVADO; URLs firmadas solo para el álbum
  *  - RLS bloquea acceso directo; service_role únicamente en Edge Function
  *  - texto siempre renderizado con textContent en el navegador
  */
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const bucket = 'graduation-photos';
-const maximumFileBytes = 5 * 1024 * 1024;
+const maximumFileBytes = 12 * 1024 * 1024;
 const corsMethods = 'GET, POST, OPTIONS';
 const allowedOrigins = new Set((Deno.env.get('ALLOWED_ORIGINS') || '').split(',').map((s) => s.trim()).filter(Boolean));
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
@@ -91,7 +91,6 @@ function scrubJpeg(original: Uint8Array): Uint8Array {
 async function listPhotos(origin: string) {
   const { data, error } = await supabase.from('graduation_photos')
     .select('id, guest_name, storage_path, created_at')
-    .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .limit(48);
   if (error) { console.error('DB list error', error.code); return fail('No se pudo abrir la galería', 500, origin); }
@@ -107,7 +106,7 @@ async function listPhotos(origin: string) {
 }
 async function uploadPhoto(request: Request, origin: string) {
   const declaredBytes = Number(request.headers.get('content-length') || '0');
-  if (declaredBytes > maximumFileBytes + 120000) return fail('La fotografía supera el tamaño permitido', 413, origin);
+  if (declaredBytes > maximumFileBytes + 120000) return fail('La fotografía optimizada supera los 12 MB permitidos', 413, origin);
   const type = request.headers.get('content-type') || '';
   if (!/^multipart\/form-data;\s*boundary=/i.test(type)) return fail('Formato de solicitud incorrecto', 415, origin);
   let form: FormData;
@@ -115,7 +114,7 @@ async function uploadPhoto(request: Request, origin: string) {
   const name = String(form.get('name') || '').replace(/\s+/g, ' ').trim();
   const uploaded = form.get('photo');
   if (name.length < 2 || name.length > 36 || /[\x00-\x1f\x7f<>]/.test(name)) return fail('Nombre no válido', 400, origin);
-  if (!(uploaded instanceof File) || uploaded.size < 100 || uploaded.size > maximumFileBytes || uploaded.type !== 'image/jpeg') return fail('Solo se permiten imágenes JPEG de hasta 5 MB', 400, origin);
+  if (!(uploaded instanceof File) || uploaded.size < 100 || uploaded.size > maximumFileBytes || uploaded.type !== 'image/jpeg') return fail('Solo se permiten fotografías JPEG optimizadas de hasta 12 MB', 400, origin);
   const ip = clientAddress(request);
   const hashed = await ipHash(ip);
   const { data: slot, error: quotaError } = await supabase.rpc('reserve_graduation_upload_slot', { p_ip_hash: hashed });
@@ -127,13 +126,13 @@ async function uploadPhoto(request: Request, origin: string) {
   const path = `2026/${crypto.randomUUID()}.jpg`;
   const { error: storageError } = await supabase.storage.from(bucket).upload(path, scrubbed, { contentType: 'image/jpeg', cacheControl: '3600', upsert: false });
   if (storageError) { console.error('Storage upload error', storageError.message); return fail('No se pudo guardar la fotografía', 500, origin); }
-  const { error: insertError } = await supabase.from('graduation_photos').insert({ storage_path: path, guest_name: name, ip_hash: hashed, status: 'pending' });
+  const { error: insertError } = await supabase.from('graduation_photos').insert({ storage_path: path, guest_name: name, ip_hash: hashed, status: 'approved' });
   if (insertError) {
     console.error('DB insert error', insertError.code);
     await supabase.storage.from(bucket).remove([path]);
     return fail('No se pudo registrar la fotografía', 500, origin);
   }
-  return json({ ok: true, status: 'pending', message: 'Foto recibida para revisión' }, 201, origin);
+  return json({ ok: true, status: 'approved', message: 'Foto añadida al álbum' }, 201, origin);
 }
 
 Deno.serve(async (request) => {

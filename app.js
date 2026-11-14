@@ -1,7 +1,6 @@
 /* Hillary · Invitación 2026
  * Sitio estático sin framework. No contiene llaves privadas.
- * Las fotos compartidas SOLO se reciben a través de Supabase Edge Function,
- * que aplica una cuota, valida el archivo y requiere moderación antes de mostrarlas.
+ * Las fotos compartidas se reciben y publican en el álbum mediante Supabase Edge Function.
  */
 (() => {
   'use strict';
@@ -247,15 +246,14 @@
     return { signal: controller.signal, clear: () => clearTimeout(timer) };
   }
 
-  // Galería con moderación en producción; en demo usa IndexedDB SOLO en este navegador.
+  // Galería compartida en producción; en demo usa IndexedDB SOLO en este navegador.
   const photoWall = $('#photoWall');
   const galleryCount = $('#galleryCount');
   const galleryEmpty = $('#galleryEmpty');
   let currentPhotoBlob = null;
   let previewUrl = null;
   let wallUrls = [];
-  let pendingPhotos = [];
-  let approvedPhotos = [];
+  let galleryPhotos = [];
   let isSubmitting = false;
   const modeNote = $('#galleryModeNote');
   if (isLocalDemo) {
@@ -263,8 +261,6 @@
   } else if (!hasSharedGallery) {
     modeNote.textContent = 'La galería compartida aún no está lista: revisa galleryEndpoint en config.js.';
     $('#submitPhoto').disabled = true;
-  } else {
-    modeNote.textContent = 'Las fotos enviadas se revisan antes de aparecer públicamente en el álbum.';
   }
   $('#cameraButton').addEventListener('click', openCamera);
   $('#chooseButton').addEventListener('click', () => $('#filePicker').click());
@@ -276,7 +272,7 @@
     if (!file || !/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type) && !/\.(heic|heif|jpg|jpeg|png|webp)$/i.test(file.name || '')) {
       notify('Selecciona una foto JPG, PNG, WebP o HEIC compatible con tu navegador.'); return;
     }
-    if (file.size > 12 * 1024 * 1024) { notify('La foto original pesa más de 12 MB. Elige una más pequeña.'); return; }
+    if (file.size > 50 * 1024 * 1024) { notify('La foto original supera los 50 MB. Elige otra foto.'); return; }
     try {
       const output = await optimizeImage(file);
       clearSelectedPhoto();
@@ -304,18 +300,22 @@
         tempUrl = URL.createObjectURL(file);
         source = await new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = tempUrl; });
       }
-      if (!source.width || !source.height || source.width * source.height > 45000000) throw new Error('Dimensiones no admitidas');
-      const ratio = Math.min(1, 1600 / Math.max(source.width, source.height));
+      if (!source.width || !source.height || source.width * source.height > 60000000) throw new Error('Dimensiones no admitidas');
+      const ratio = Math.min(1, 3200 / Math.max(source.width, source.height));
       const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.round(source.width * ratio));
-      canvas.height = Math.max(1, Math.round(source.height * ratio));
       const ctx = canvas.getContext('2d', { alpha: false });
       if (!ctx) throw new Error('Canvas no disponible');
-      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise((resolve, reject) => canvas.toBlob((b) => b ? resolve(b) : reject(new Error('No se pudo codificar')), 'image/jpeg', .82));
-      if (blob.size > 5 * 1024 * 1024) throw new Error('La foto optimizada excede el límite');
-      return blob;
+      for (const scale of [1, .9, .8]) {
+        canvas.width = Math.max(1, Math.round(source.width * ratio * scale));
+        canvas.height = Math.max(1, Math.round(source.height * ratio * scale));
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+        for (const quality of [.92, .88, .84, .8]) {
+          const blob = await new Promise((resolve, reject) => canvas.toBlob((b) => b ? resolve(b) : reject(new Error('No se pudo codificar')), 'image/jpeg', quality));
+          if (blob.size <= 12 * 1024 * 1024) return blob;
+        }
+      }
+      throw new Error('La foto optimizada supera el límite de 12 MB');
     } finally {
       if (source?.close) source.close();
       if (tempUrl) URL.revokeObjectURL(tempUrl);
@@ -345,9 +345,8 @@
         uploadTimeout.clear();
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error || `No se pudo subir (${response.status})`);
-        pendingPhotos.unshift({ id: newId(), name: guestName, blob: currentPhotoBlob, pending: true, created_at: new Date().toISOString() });
-        renderPhotos([...pendingPhotos, ...approvedPhotos]);
-        notify('¡Foto recibida! Se muestra como vista previa; será visible para todos cuando la aprueben.');
+        notify('¡Foto añadida al álbum compartido!');
+        await loadGallery();
       }
       clearSelectedPhoto();
       $('#uploadForm').reset();
@@ -366,7 +365,7 @@
     try {
       if (isLocalDemo) {
         const records = await readLocalPhotos();
-        approvedPhotos = records.map((p) => ({ ...p, local: true }));
+        galleryPhotos = records.map((p) => ({ ...p, local: true }));
       } else if (hasSharedGallery) {
         const galleryTimeout = createRequestTimeout(15000);
         const response = await fetch(`${galleryEndpoint}?action=list`, { method: 'GET', cache: 'no-store', mode: 'cors', referrerPolicy: 'no-referrer', signal: galleryTimeout.signal });
@@ -374,12 +373,12 @@
         const data = await response.json().catch(() => ({}));
         if (!response.ok || !Array.isArray(data.photos)) throw new Error(data.error || 'No se pudo cargar el álbum');
         const serviceOrigin = new URL(galleryEndpoint).origin;
-        approvedPhotos = data.photos.filter((p) => {
+        galleryPhotos = data.photos.filter((p) => {
           try { return typeof p.id === 'string' && typeof p.name === 'string' && new URL(p.url).origin === serviceOrigin && new URL(p.url).protocol === 'https:'; }
           catch { return false; }
         }).slice(0, 48);
       }
-      renderPhotos([...pendingPhotos, ...approvedPhotos]);
+      renderPhotos(galleryPhotos);
     } catch { notify('No se pudo actualizar la galería. Comprueba tu conexión y vuelve a intentar.'); }
     finally { btn.disabled = false; }
   }
@@ -393,7 +392,7 @@
     galleryCount.textContent = `${photos.length} ${photos.length === 1 ? 'FOTO' : 'FOTOS'}`;
     for (const item of photos) {
       const card = document.createElement('div');
-      card.className = `photo-polaroid${item.pending ? ' pending' : ''}`;
+      card.className = 'photo-polaroid';
       const img = document.createElement('img');
       img.alt = `Recuerdo compartido por ${item.name}`;
       img.loading = 'lazy';
@@ -406,12 +405,6 @@
       caption.className = 'photo-caption';
       caption.textContent = item.name.slice(0, 36);
       card.append(img, caption);
-      if (item.pending) {
-        const status = document.createElement('small');
-        status.className = 'photo-status';
-        status.textContent = 'Pendiente de aprobación · solo tú la ves';
-        card.append(status);
-      }
       photoWall.append(card);
     }
   }

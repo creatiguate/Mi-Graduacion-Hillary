@@ -37,17 +37,17 @@ Sitio **mobile-first** en HTML, CSS y JavaScript, listo para publicarse como pro
 ## 2. Galería: dos modos
 
 - **Sin configuración (por defecto):** es una demostración funcional. Los invitados pueden probar cámara, elegir fotografía, escribir su nombre y crear Polaroids. Estas fotos se guardan **solo en el navegador/dispositivo** con IndexedDB, nunca se comparten. El sitio muestra una advertencia explicando esta limitación.
-- **Con Supabase:** las fotos se envían a una API con límite de cuatro intentos por hora y moderación manual. El organizador aprueba cada foto desde el panel de Supabase; **solo las aprobadas** aparecen en las galerías de todos los invitados. No se usa captcha, por lo que la protección contra spam es más limitada. El servicio Supabase debe configurarse por su titular y sus límites/planes pueden cambiar.
+- **Con Supabase:** las fotos se envían a una API con límite de 50 intentos por hora y aparecen automáticamente en el álbum compartido. No se usa captcha, así que la protección contra spam es más limitada. El servicio Supabase debe configurarse por su titular y sus límites/planes pueden cambiar.
 
 GitHub Pages es hosting estático y **no** ofrece por sí mismo una base de datos compartida ni acepta archivos subidos de forma persistente por otros visitantes.
 
 ### 2A. Preparar Supabase
 
 1. Crea un proyecto nuevo en [Supabase](https://supabase.com/), inicia sesión y conserva su `project ref`.
-2. Abre **SQL Editor** del proyecto, pega el contenido completo de `supabase/migrations/20261106000000_graduation_gallery.sql` y ejecútalo **una sola vez**; alternativamente aplica la migración con Supabase CLI. Esto crea:
-   - tabla `graduation_photos` con estados `pending`, `approved`, `rejected`;
+2. Ejecuta, en orden por nombre, todas las migraciones de `supabase/migrations/` desde el **SQL Editor** o con Supabase CLI. Esto crea:
+   - tabla `graduation_photos`; las fotos nuevas se publican automáticamente en el álbum;
    - tabla y función para limitar a **50 intentos por hora** por IP hash;
-   - bucket `graduation-photos` **privado**, con límite de 5 MB/JPEG;
+   - bucket `graduation-photos` **privado**, con límite de 12 MB/JPEG por archivo optimizado;
    - restricciones de acceso RLS (ninguna lectura/escritura pública directa).
 3. Asegúrate de **NO** activar `Public bucket` y de no crear políticas públicas de acceso a las fotos o tablas.
 
@@ -93,15 +93,9 @@ window.INVITATION_CONFIG = Object.freeze({
 
 Vuelve a subir el archivo al repositorio. La galería conectada se habilitará automáticamente. **`SUPABASE_SERVICE_ROLE_KEY` nunca debe aparecer en este archivo.**
 
-### 2E. Aprobar fotografías
+### 2E. Fotos en el álbum
 
-1. En Supabase entra a **Table Editor → `graduation_photos`**.
-2. Localiza las filas con `status = pending` y revisa las fotos en **Storage → `graduation-photos`**. Las rutas de cada foto aparecen en `storage_path`.
-3. Cambia el campo `status` a `approved` para mostrar esa foto en la galería. Si no la deseas, cambia a `rejected`.
-4. Si una foto debe eliminarse, **elimina también el archivo del bucket privado y su fila** en la tabla. Ten en cuenta que una URL firmada entregada antes de borrarla puede seguir siendo válida hasta que venza (una hora), salvo que se borre el objeto.
-5. Pulsa **Actualizar galería** desde la invitación para ver las aprobadas; las nuevas fotos no aparecen automáticamente hasta aprobarlas y actualizar.
-
-**Moderación importante:** todas las fotos enviadas quedan en estado `pending`, nunca públicas por defecto. Puedes desactivar los envíos al terminar el evento dejando la función inaccesible o quitando el origen permitido en la configuración del servidor. Se recomienda limpiar fotos y registros cuando ya no sean necesarios.
+Las fotos aparecen automáticamente al enviarse. Para retirar una, elimina su archivo de **Storage → `graduation-photos`** y su fila en `graduation_photos`. Una URL firmada entregada antes puede seguir vigente hasta una hora. Se recomienda limpiar fotos y registros cuando ya no sean necesarios.
 
 ## 3. Música de la invitación
 
@@ -116,12 +110,12 @@ Al abrir la invitación se intentará reproducir; si el navegador lo bloquea, el
 ## 4. Seguridad y privacidad
 
 - **Captura:** la cámara se activa solo cuando el invitado pulsa **Abrir cámara**, solicita permiso del navegador y se apaga al cerrar el cuadro. Funciona en contextos seguros como HTTPS o localhost.
-- **Fotos:** el navegador convierte la imagen a JPEG y reduce su tamaño, lo que normalmente elimina metadatos del archivo original. La función también elimina segmentos JPEG de metadatos previos al primer escaneo (EXIF/XMP/COM) y valida encabezados/dimensiones. No permite subir SVG ni scripts.
-- **Abuso:** la API limita a 50 intentos por hora según IP hash, pero no usa captcha. Invitados conectados a la misma red comparten este límite. CORS no es autenticación y no detiene bots que contacten directamente la API; modera las fotos antes de publicarlas.
-- **Acceso:** CORS con lista de orígenes, almacenamiento privado, URLs firmadas temporales, tabla sin políticas públicas, secretos exclusivamente en servidor y aprobación manual.
+- **Fotos:** se aceptan originales de hasta 50 MB y 60 MP. El navegador los convierte a JPEG de hasta 3200 px, conserva buena calidad y limita el archivo optimizado a 12 MB. Esto normalmente elimina metadatos del original; la función también elimina segmentos JPEG EXIF/XMP/COM y valida encabezados/dimensiones. No permite subir SVG ni scripts.
+- **Abuso:** la API limita a 50 intentos por hora según IP hash, pero no usa captcha. Invitados conectados a la misma red comparten este límite. CORS no es autenticación y no detiene bots que contacten directamente la API; las fotos se publican automáticamente.
+- **Acceso:** CORS con lista de orígenes, almacenamiento privado, URLs firmadas temporales, tabla sin políticas públicas y secretos exclusivamente en servidor.
 - **Contenido:** no insertamos los nombres enviados mediante `innerHTML`; se pintan como texto seguro. Validación de longitud y caracteres tanto en navegador como servidor.
 - **Cabeceras:** la página incorpora una política CSP mediante etiqueta meta, no carga JavaScript de bibliotecas arbitrarias y usa `rel="noopener noreferrer"` en enlaces externos. GitHub Pages **no permite definir todas las cabeceras HTTP de seguridad** desde archivos estáticos; para CSP como cabecera HTTP, HSTS, frame-ancestors y otras reglas, usa un proxy/CDN configurable.
-- **Fotos de terceros:** solicita consentimiento de las personas retratadas, evita fotos sensibles y no compartas información personal que no deseas mostrar. La casilla de consentimiento avisa que la foto y el nombre se verán por quienes tengan el enlace después de aprobarla. Cualquier invitado con acceso a la URL pública podría ver o guardar fotos aprobadas.
+- **Fotos de terceros:** solicita consentimiento de las personas retratadas, evita fotos sensibles y no compartas información personal que no deseas mostrar. La casilla de consentimiento avisa que la foto y el nombre serán visibles para quienes tengan el enlace. Cualquier persona con acceso a la URL pública podría ver o guardar las fotos.
 - **Retención:** revisa y borra fotos al terminar el evento. El archivo `.gitignore` ayuda a evitar subir `.env` y secretos por accidente.
 
 Si deseas una invitación totalmente **privada**, necesitarás agregar autenticación e invitar usuarios autorizados; un enlace de GitHub Pages no constituye control de acceso. No existe un método seguro para guardar secretos exclusivamente dentro de una página estática.

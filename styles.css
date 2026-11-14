@@ -388,7 +388,7 @@ body { background:var(--ivory); }
   .rsvp-summary-icon { font-size:21px; }
 }
 @media (prefers-reduced-motion:reduce) {
-  .flying-butterflies, .butterfly { display:none!important; }
+  .flying-butterflies { display:none!important; }
   .opening, .reveal, .opening-action { transition:none!important; }
   .reveal { opacity:1; transform:none; }
 }
