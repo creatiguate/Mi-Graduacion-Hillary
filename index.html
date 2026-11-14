@@ -8,7 +8,7 @@
   <meta name="robots" content="noindex, nofollow, noarchive">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.supabase.co; media-src 'self' blob:; connect-src 'self' https://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' blob: data: https://*.supabase.co; media-src 'self' blob:; connect-src 'self' https://*.supabase.co; upgrade-insecure-requests">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Hillary · Mi graduación 2026">
   <meta property="og:description" content="Los sueños se alcanzan con esfuerzo, pero se disfrutan más cuando se comparten. 28 de noviembre, 6:00 p. m.">
@@ -238,7 +238,6 @@
               <label for="guestName">¿Cómo te llamas?</label>
               <input id="guestName" name="guestName" type="text" placeholder="Tu nombre" maxlength="36" minlength="2" autocomplete="name" required>
               <label class="consent-row"><input id="photoConsent" type="checkbox" required><span>Confirmo que puedo compartir esta foto y acepto que esta foto y mi nombre aparezcan en la galería visible para quienes tengan el enlace, después de su revisión.</span></label>
-              <div id="turnstileMount" class="turnstile-mount" aria-label="Verificación de seguridad"></div>
               <button type="submit" class="btn btn-blue submit-upload" id="submitPhoto">Añadir al álbum <span aria-hidden="true">♡</span></button>
             </form>
             <p class="upload-limit">Fotos JPG, PNG o WebP · Máximo 12 MB antes de optimizar.</p>

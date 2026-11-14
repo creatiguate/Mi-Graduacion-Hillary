@@ -1,20 +1,19 @@
 /* Hillary · Invitación 2026
  * Sitio estático sin framework. No contiene llaves privadas.
  * Las fotos compartidas SOLO se reciben a través de Supabase Edge Function,
- * que verifica captcha, cuota, tipo de archivo y moderación antes de mostrarlas.
+ * que aplica una cuota, valida el archivo y requiere moderación antes de mostrarlas.
  */
 (() => {
   'use strict';
   const $ = (selector) => document.querySelector(selector);
   const cfg = window.INVITATION_CONFIG || {};
   const galleryEndpoint = String(cfg.galleryEndpoint || '').trim().replace(/\/+$/, '');
-  const siteKey = String(cfg.turnstileSiteKey || '').trim();
   const isLocalDemo = !galleryEndpoint;
   const validEndpoint = (() => {
     try { const u = new URL(galleryEndpoint); return u.protocol === 'https:' && /\/(functions\/v1\/graduation-gallery)$/.test(u.pathname); }
     catch { return false; }
   })();
-  const hasSharedGallery = validEndpoint && Boolean(siteKey);
+  const hasSharedGallery = validEndpoint;
   const eventDate = new Date('2026-11-28T18:00:00-06:00').getTime();
 
   // Cada carga comienza en el inicio de la invitación, aunque el navegador
@@ -257,18 +256,15 @@
   let wallUrls = [];
   let pendingPhotos = [];
   let approvedPhotos = [];
-  let turnstileToken = '';
-  let turnstileWidget = null;
   let isSubmitting = false;
   const modeNote = $('#galleryModeNote');
   if (isLocalDemo) {
     modeNote.textContent = 'Galería en modo de demostración: las fotografías se guardan únicamente en este dispositivo y todavía no son visibles para los demás invitados.';
   } else if (!hasSharedGallery) {
-    modeNote.textContent = 'La galería compartida aún no está lista: revisa galleryEndpoint y turnstileSiteKey en config.js.';
+    modeNote.textContent = 'La galería compartida aún no está lista: revisa galleryEndpoint en config.js.';
     $('#submitPhoto').disabled = true;
   } else {
     modeNote.textContent = 'Las fotos enviadas se revisan antes de aparecer públicamente en el álbum.';
-    setupTurnstile();
   }
   $('#cameraButton').addEventListener('click', openCamera);
   $('#chooseButton').addEventListener('click', () => $('#filePicker').click());
@@ -325,26 +321,6 @@
       if (tempUrl) URL.revokeObjectURL(tempUrl);
     }
   }
-  async function setupTurnstile() {
-    try {
-      const script = document.createElement('script');
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
-      script.async = true;
-      script.onload = () => {
-        if (!window.turnstile) { notify('No se cargó la verificación de seguridad.'); return; }
-        turnstileWidget = window.turnstile.render('#turnstileMount', {
-          sitekey: siteKey,
-          theme: 'light',
-          callback: (token) => { turnstileToken = token; },
-          'expired-callback': () => { turnstileToken = ''; },
-          'error-callback': () => { turnstileToken = ''; }
-        });
-      };
-      script.onerror = () => notify('No se pudo cargar la verificación. Revisa tu conexión a internet.');
-      document.head.append(script);
-    } catch { notify('No fue posible iniciar la protección contra spam.'); }
-  }
-
   $('#uploadForm').addEventListener('submit', async (event) => {
     event.preventDefault();
     if (isSubmitting || (!isLocalDemo && !hasSharedGallery)) return;
@@ -352,7 +328,6 @@
     if (guestName.length < 2 || guestName.length > 36 || /[\x00-\x1f\x7f<>]/.test(guestName)) { notify('Escribe tu nombre (entre 2 y 36 caracteres).'); $('#guestName').focus(); return; }
     if (!currentPhotoBlob) { notify('Primero toma o selecciona una fotografía.'); return; }
     if (!$('#photoConsent').checked) { notify('Debes aceptar la publicación de tu foto para continuar.'); return; }
-    if (hasSharedGallery && !turnstileToken) { notify('Completa la verificación de seguridad antes de enviar.'); return; }
     isSubmitting = true;
     $('#submitPhoto').disabled = true;
     $('#submitPhoto').firstChild.textContent = 'Enviando fotografía… ';
@@ -365,7 +340,6 @@
         const data = new FormData();
         data.append('photo', new File([currentPhotoBlob], 'recuerdo.jpg', { type: 'image/jpeg' }));
         data.append('name', guestName);
-        data.append('turnstileToken', turnstileToken);
         const uploadTimeout = createRequestTimeout(25000);
         const response = await fetch(galleryEndpoint, { method: 'POST', body: data, cache: 'no-store', mode: 'cors', referrerPolicy: 'no-referrer', signal: uploadTimeout.signal });
         uploadTimeout.clear();
@@ -383,10 +357,6 @@
       isSubmitting = false;
       $('#submitPhoto').disabled = !isLocalDemo && !hasSharedGallery;
       $('#submitPhoto').firstChild.textContent = 'Añadir al álbum ';
-      if (hasSharedGallery) {
-        turnstileToken = '';
-        if (window.turnstile && turnstileWidget !== null) window.turnstile.reset(turnstileWidget);
-      }
     }
   });
 

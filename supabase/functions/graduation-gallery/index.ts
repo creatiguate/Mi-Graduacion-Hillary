@@ -1,8 +1,7 @@
 /**
- * Supabase Edge Function: subida pública protegida + galería privada moderada.
+ * Supabase Edge Function: subida pública con cuota + galería privada moderada.
  * Seguridad:
  *  - allowlist de Origin y método
- *  - Turnstile validado en servidor y dominio controlado
  *  - 4 intentos/hora/IP hash (SQL, bloqueo atómico)
  *  - límites de peso, cabecera JPEG, dimensiones y eliminación de EXIF/metadatos
  *  - bucket PRIVADO; URLs firmadas solo a entradas approved
@@ -15,10 +14,8 @@ const bucket = 'graduation-photos';
 const maximumFileBytes = 5 * 1024 * 1024;
 const corsMethods = 'GET, POST, OPTIONS';
 const allowedOrigins = new Set((Deno.env.get('ALLOWED_ORIGINS') || '').split(',').map((s) => s.trim()).filter(Boolean));
-const allowedHostnames = new Set((Deno.env.get('TURNSTILE_ALLOWED_HOSTNAMES') || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean));
 const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-const turnstileSecret = Deno.env.get('TURNSTILE_SECRET_KEY') || '';
 const hashSalt = Deno.env.get('IP_HASH_SALT') || '';
 const supabase = createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
@@ -91,17 +88,6 @@ function scrubJpeg(original: Uint8Array): Uint8Array {
   for (const chunk of chunks) { result.set(chunk, offset); offset += chunk.length; }
   return result;
 }
-async function verifyTurnstile(token: string, ip: string): Promise<boolean> {
-  if (token.length < 10 || token.length > 2048 || allowedHostnames.size === 0) return false;
-  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ secret: turnstileSecret, response: token, remoteip: ip, idempotency_key: crypto.randomUUID() }),
-    signal: AbortSignal.timeout(9000)
-  });
-  if (!response.ok) return false;
-  const result = await response.json();
-  return result.success === true && typeof result.hostname === 'string' && allowedHostnames.has(result.hostname.toLowerCase());
-}
 async function listPhotos(origin: string) {
   const { data, error } = await supabase.from('graduation_photos')
     .select('id, guest_name, storage_path, created_at')
@@ -127,13 +113,10 @@ async function uploadPhoto(request: Request, origin: string) {
   let form: FormData;
   try { form = await request.formData(); } catch { return fail('Solicitud inválida', 400, origin); }
   const name = String(form.get('name') || '').replace(/\s+/g, ' ').trim();
-  const token = String(form.get('turnstileToken') || '');
   const uploaded = form.get('photo');
   if (name.length < 2 || name.length > 36 || /[\x00-\x1f\x7f<>]/.test(name)) return fail('Nombre no válido', 400, origin);
   if (!(uploaded instanceof File) || uploaded.size < 100 || uploaded.size > maximumFileBytes || uploaded.type !== 'image/jpeg') return fail('Solo se permiten imágenes JPEG de hasta 5 MB', 400, origin);
   const ip = clientAddress(request);
-  const verified = await verifyTurnstile(token, ip).catch(() => false);
-  if (!verified) return fail('No se pudo verificar el captcha. Recarga la página e inténtalo de nuevo', 403, origin);
   const hashed = await ipHash(ip);
   const { data: slot, error: quotaError } = await supabase.rpc('reserve_graduation_upload_slot', { p_ip_hash: hashed });
   if (quotaError) { console.error('Quota error', quotaError.code); return fail('No se pudo validar el límite de subidas', 500, origin); }
@@ -157,7 +140,7 @@ Deno.serve(async (request) => {
   const origin = request.headers.get('origin') || '';
   // Origin es una barrera CORS de navegadores, NO un mecanismo de autenticación.
   if (!allowedOrigins.has(origin)) return fail('Origen no autorizado', 403, '');
-  if (!supabaseUrl || !serviceRoleKey || !turnstileSecret || !hashSalt || hashSalt.length < 24 || allowedHostnames.size === 0) {
+  if (!supabaseUrl || !serviceRoleKey || !hashSalt || hashSalt.length < 24) {
     console.error('Missing required configuration');
     return fail('La galería no está configurada en el servidor', 503, origin);
   }

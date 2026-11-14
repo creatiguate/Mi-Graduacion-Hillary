@@ -17,7 +17,7 @@ Sitio **mobile-first** en HTML, CSS y JavaScript, listo para publicarse como pro
 - **Confirmar asistencia:** en vez de compartir el enlace, el formulario pide nombre, respuesta sí/no, número de asistentes (si asiste) y mensaje opcional. Genera un texto listo para enviar a **+502 3340 2375** mediante WhatsApp. **El invitado debe pulsar «Enviar» dentro de WhatsApp**. El formulario no guarda respuestas ni recopila datos en un servidor.
 - **Periódico completo:** no se recorta, muestra el contenido íntegro y ofrece un enlace para abrir la imagen en grande.
 - **Lugar:** incluye las tres fotos del Hotel El Campo. La imagen de decoración que se proporcionó se usa solo como referencia de tonos, no como fotografía real del recinto. Se advierte claramente que **la piscina no estará habilitada**.
-- **Galería compartida:** requiere configurar Supabase y Turnstile como se describe abajo. Sin configurar, funciona únicamente como demostración local.
+- **Galería compartida:** requiere configurar Supabase como se describe abajo. No usa Cloudflare Turnstile. Sin configurar, funciona únicamente como demostración local.
 
 **Derechos de autor:** el MP3 es la grabación aportada para este encargo; tener el archivo no implica autorización para distribuirlo públicamente. Confirma que tienes los derechos o licencia correspondientes **antes de activar GitHub Pages con el MP3 publicado**. En caso contrario, retíralo de `assets/audio/` y deja `musicUrl: ""` en `config.js`.
 
@@ -37,7 +37,7 @@ Sitio **mobile-first** en HTML, CSS y JavaScript, listo para publicarse como pro
 ## 2. Galería: dos modos
 
 - **Sin configuración (por defecto):** es una demostración funcional. Los invitados pueden probar cámara, elegir fotografía, escribir su nombre y crear Polaroids. Estas fotos se guardan **solo en el navegador/dispositivo** con IndexedDB, nunca se comparten. El sitio muestra una advertencia explicando esta limitación.
-- **Con Supabase + Cloudflare Turnstile:** las fotos se envían a una API con verificación de seguridad y moderación. El organizador aprueba cada foto desde el panel de Supabase; **solo las aprobadas** aparecen en las galerías de todos los invitados. No necesitas comprar servidor propio, pero el servicio Supabase y Turnstile deben configurarse por su titular y sus límites/planes pueden cambiar.
+- **Con Supabase:** las fotos se envían a una API con límite de cuatro intentos por hora y moderación manual. El organizador aprueba cada foto desde el panel de Supabase; **solo las aprobadas** aparecen en las galerías de todos los invitados. No se usa captcha, por lo que la protección contra spam es más limitada. El servicio Supabase debe configurarse por su titular y sus límites/planes pueden cambiar.
 
 GitHub Pages es hosting estático y **no** ofrece por sí mismo una base de datos compartida ni acepta archivos subidos de forma persistente por otros visitantes.
 
@@ -51,13 +51,7 @@ GitHub Pages es hosting estático y **no** ofrece por sí mismo una base de dato
    - restricciones de acceso RLS (ninguna lectura/escritura pública directa).
 3. Asegúrate de **NO** activar `Public bucket` y de no crear políticas públicas de acceso a las fotos o tablas.
 
-### 2B. Crear Cloudflare Turnstile (captcha)
-
-1. Crea un widget Turnstile en [Cloudflare](https://dash.cloudflare.com/) y autoriza el dominio donde estará la invitación, por ejemplo `tu-usuario.github.io` (solo dominio, sin la ruta del repositorio). Agrega `localhost` solo para pruebas si Cloudflare lo permite.
-2. Copia la **site key** (clave pública) y la **secret key** (clave secreta). **No son intercambiables**.
-3. En producción usa los dominios reales de tu invitación, no sitios externos. Si usas dominio personalizado, actualiza ambos dominios y la configuración de CORS.
-
-### 2C. Desplegar la función de Supabase
+### 2B. Desplegar la función de Supabase
 
 Necesitas [Supabase CLI](https://supabase.com/docs/guides/local-development/cli/getting-started) (instalado siguiendo su guía oficial) y acceso al proyecto.
 
@@ -73,8 +67,6 @@ Configura las variables secretas **en Supabase, nunca en GitHub** (el siguiente 
 ```bash
 supabase secrets set \
   ALLOWED_ORIGINS="https://TU-USUARIO.github.io" \
-  TURNSTILE_ALLOWED_HOSTNAMES="TU-USUARIO.github.io" \
-  TURNSTILE_SECRET_KEY="TU_SECRET_KEY_DE_TURNSTILE" \
   IP_HASH_SALT="UNA_CADENA_ALEATORIA_LARGA_DE_AL_MENOS_32_CARACTERES"
 
 supabase functions deploy graduation-gallery --no-verify-jwt
@@ -82,7 +74,7 @@ supabase functions deploy graduation-gallery --no-verify-jwt
 
 > `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` los inyecta normalmente el entorno hospedado de Edge Functions de Supabase. La función usa la clave de servicio **solo del lado del servidor**. Si tu entorno difiere, revísalo en la documentación oficial. No incluyas jamás la service role key en `config.js`, HTML, GitHub Actions ni archivos públicos.
 
-En `ALLOWED_ORIGINS` pueden escribirse varios orígenes separados por comas, por ejemplo `https://TU-USUARIO.github.io,https://invitacion.tudominio.com`; **no incluyas rutas**. En `TURNSTILE_ALLOWED_HOSTNAMES` usa solo hosts, también separados por comas. Si haces pruebas locales puedes añadir `http://localhost:5500` al origen y `localhost` a los hosts autorizados, con claves de prueba apropiadas.
+En `ALLOWED_ORIGINS` pueden escribirse varios orígenes separados por comas, por ejemplo `https://TU-USUARIO.github.io,https://invitacion.tudominio.com`; **no incluyas rutas**. Para pruebas locales puedes añadir `http://localhost:5500`.
 
 Si alguna vez modificas la función, vuelve a ejecutar el deploy. Para acceder a la API utiliza:
 
@@ -95,12 +87,11 @@ Edita `config.js` de la web:
 ```js
 window.INVITATION_CONFIG = Object.freeze({
   galleryEndpoint: "https://TU_PROJECT_REF.supabase.co/functions/v1/graduation-gallery",
-  turnstileSiteKey: "TU_SITE_KEY_PUBLICA",
   musicUrl: ""
 });
 ```
 
-Vuelve a subir el archivo al repositorio. El captcha y la galería conectada se habilitarán automáticamente. **Ni `SUPABASE_SERVICE_ROLE_KEY` ni `TURNSTILE_SECRET_KEY` aparecen aquí.**
+Vuelve a subir el archivo al repositorio. La galería conectada se habilitará automáticamente. **`SUPABASE_SERVICE_ROLE_KEY` nunca debe aparecer en este archivo.**
 
 ### 2E. Aprobar fotografías
 
@@ -110,7 +101,7 @@ Vuelve a subir el archivo al repositorio. El captcha y la galería conectada se 
 4. Si una foto debe eliminarse, **elimina también el archivo del bucket privado y su fila** en la tabla. Ten en cuenta que una URL firmada entregada antes de borrarla puede seguir siendo válida hasta que venza (una hora), salvo que se borre el objeto.
 5. Pulsa **Actualizar galería** desde la invitación para ver las aprobadas; las nuevas fotos no aparecen automáticamente hasta aprobarlas y actualizar.
 
-**Moderación importante:** todas las fotos enviadas quedan en estado `pending`, nunca públicas por defecto. Puedes desactivar los envíos al terminar el evento dejando la función inaccesible o retirando la clave de Turnstile en la configuración del servidor. Se recomienda limpiar fotos y registros cuando ya no sean necesarios.
+**Moderación importante:** todas las fotos enviadas quedan en estado `pending`, nunca públicas por defecto. Puedes desactivar los envíos al terminar el evento dejando la función inaccesible o quitando el origen permitido en la configuración del servidor. Se recomienda limpiar fotos y registros cuando ya no sean necesarios.
 
 ## 3. Música de la invitación
 
@@ -126,7 +117,7 @@ Al abrir la invitación se intentará reproducir; si el navegador lo bloquea, el
 
 - **Captura:** la cámara se activa solo cuando el invitado pulsa **Abrir cámara**, solicita permiso del navegador y se apaga al cerrar el cuadro. Funciona en contextos seguros como HTTPS o localhost.
 - **Fotos:** el navegador convierte la imagen a JPEG y reduce su tamaño, lo que normalmente elimina metadatos del archivo original. La función también elimina segmentos JPEG de metadatos previos al primer escaneo (EXIF/XMP/COM) y valida encabezados/dimensiones. No permite subir SVG ni scripts.
-- **Abuso:** captcha validado en servidor y cuota por IP hash; no garantizan una defensa absoluta contra bots avanzados o ataques distribuidos. Para mayor volumen, considera protecciones de red y planes con límites adecuados.
+- **Abuso:** la API limita a 4 intentos por hora según IP hash, pero no usa captcha. CORS no es autenticación y no detiene bots que contacten directamente la API; para un evento de mayor volumen, añade una protección antiabuso y límites apropiados en el proveedor.
 - **Acceso:** CORS con lista de orígenes, almacenamiento privado, URLs firmadas temporales, tabla sin políticas públicas, secretos exclusivamente en servidor y aprobación manual.
 - **Contenido:** no insertamos los nombres enviados mediante `innerHTML`; se pintan como texto seguro. Validación de longitud y caracteres tanto en navegador como servidor.
 - **Cabeceras:** la página incorpora una política CSP mediante etiqueta meta, no carga JavaScript de bibliotecas arbitrarias y usa `rel="noopener noreferrer"` en enlaces externos. GitHub Pages **no permite definir todas las cabeceras HTTP de seguridad** desde archivos estáticos; para CSP como cabecera HTTP, HSTS, frame-ancestors y otras reglas, usa un proxy/CDN configurable.
